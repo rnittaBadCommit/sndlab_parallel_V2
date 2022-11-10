@@ -24,10 +24,13 @@ Config& Config::operator=( const Config& other)
 	if (this == &other)
 		return (*this);
 
-	childServer_conf_vec_ = other.childServer_conf_vec_;
+	childServerConf_vec_ = other.childServerConf_vec_;
 
 	return (*this);
 }
+
+const std::vector<Config::childServerConf>& Config::getChildServerConf_vec() const
+{ return (childServerConf_vec_); }
 
 void Config::importConfig( const std::string& _config_path )
 {
@@ -66,9 +69,9 @@ void Config::importConfig( const std::string& _config_path )
 			throw std::runtime_error("Error: Config Class: invalid Eb (line: " + std::to_string(_count_line) + ")\n"
 										+ "syntax: [Server IP] [Eb]");
 		}
-		childServer_conf_vec_.push_back(childServer_conf(_ip, _Eb));
+		childServerConf_vec_.push_back(childServerConf(_ip, _Eb));
     }
-    std::cout << "childServer_conf_vec_.size(): " << childServer_conf_vec_.size() << std::endl;
+    std::cout << "childServerConf_vec_.size(): " << childServerConf_vec_.size() << std::endl;
 }
 
 Config::status Config::check_ip_( const std::string _ip )

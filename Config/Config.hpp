@@ -18,7 +18,7 @@ class Config
 		// typedef
 			typedef std::string ip;
 			typedef int Eb;
-			typedef std::pair<ip, Eb> childServer_conf;
+			typedef std::pair<ip, Eb> childServerConf;
 
 		// canonical
 			Config();
@@ -27,7 +27,7 @@ class Config
 			Config& operator=( const Config& other );
 
 		// getter
-			
+			const std::vector<childServerConf>& getChildServerConf_vec() const;
 
 		// func
 			void importConfig( const std::string& _config_path );
@@ -39,7 +39,7 @@ class Config
 			OK,
 		};
 		typedef E_STATUS status;
-		std::vector<childServer_conf> childServer_conf_vec_;
+		std::vector<childServerConf> childServerConf_vec_;
 		status check_ip_( const std::string _ip );
 };	// class Config
 
