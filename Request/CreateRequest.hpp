@@ -16,6 +16,8 @@ class CreateRequest
 			~CreateRequest();
 			CreateRequest& operator=( const CreateRequest& other );
 
+		void clear();
+
 		// create Request
 			std::string getRequest() const;
 			void setMethod( const std::string& _method );

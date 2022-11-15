@@ -30,6 +30,14 @@ CreateRequest& CreateRequest::operator=( const CreateRequest& other )
 	return (*this);
 }
 
+void CreateRequest::clear()
+{
+	status_map_.clear();
+	method_ = "";
+	header_ = "";
+	body_ = "";
+}
+
 // "[METHOD] [HEADER_SIZE] [HEADER] [BODY_SIZE] [BODY]"
 std::string CreateRequest::getRequest() const
 {
