@@ -5,7 +5,7 @@ namespace rnitta
 
 
 Socket::Socket()
-: port_(8080), IPAddress_(getIPAddress_())
+: port_(DEFAULT_PORT), IPAddress_(getIPAddress_())
 {
 	setup_();
 }
@@ -35,7 +35,7 @@ Socket::Socket( const int port )
 	setup_();
 }
 
-Socket::RecievedMsg Socket::communicate_()
+RecievedMsg Socket::communicate_()
 {
 	poll(&poll_fd_vec_[0], poll_fd_vec_.size(), -1);
 	for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
@@ -165,7 +165,7 @@ void Socket::register_new_client_(int sock_fd)
 	fd_to_index_map_[connection] = poll_fd_vec_.size() - 1;
 }
 
-Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int _connection)
+RecievedMsg Socket::recieve_msg_from_connected_client_(int _connection)
 {
 	char buf[BUFFER_SIZE + 1];
 
@@ -173,7 +173,7 @@ Socket::RecievedMsg Socket::recieve_msg_from_connected_client_(int _connection)
 	if (_recv_ret < 0)
 		throw std::runtime_error("Error: recv");
 	buf[_recv_ret] = '\0';
-	return (Socket::RecievedMsg(std::string(buf), _connection));
+	return (RecievedMsg(std::string(buf), _connection));
 }
 
 

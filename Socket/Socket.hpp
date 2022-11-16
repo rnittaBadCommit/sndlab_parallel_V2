@@ -1,4 +1,4 @@
-u	#ifndef SOCKET_HPP
+#ifndef SOCKET_HPP
 # define SOCKET_HPP
 
 # include <iostream>
@@ -9,6 +9,7 @@ u	#ifndef SOCKET_HPP
 # include <sys/types.h>  //ソケットタイプ
 # include <arpa/inet.h>  //バイトオーダの変換に利用
 # include <poll.h>
+# include <cstring>
 
 # include "../utils/utils.hpp"
 # include "../RecievedMsg/RecievedMsg.hpp"
@@ -20,6 +21,8 @@ namespace rnitta
 class Socket
 {
 	public:
+		// default parametaer
+			static const int DEFAULT_PORT = 8080;
 		// canonical & other constructors
 			Socket();
 			Socket( const Socket& other );
@@ -29,7 +32,7 @@ class Socket
 			Socket( const int port );
 
 		// Func
-			Server::RecievedMsg communicate_();
+			RecievedMsg communicate_();
 
 		// Exception
 			class recieveMsgFromNewClient : public std::exception
