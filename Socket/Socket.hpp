@@ -4,12 +4,14 @@
 # include <iostream>
 # include <vector>
 # include <map>
+# include <set>
 
 # include <sys/socket.h> //アドレスドメイン
 # include <sys/types.h>  //ソケットタイプ
 # include <arpa/inet.h>  //バイトオーダの変換に利用
 # include <poll.h>
 # include <cstring>
+# include <unistd.h>
 
 # include "../utils/utils.hpp"
 # include "../RecievedMsg/RecievedMsg.hpp"
@@ -21,13 +23,16 @@ namespace rnitta
 class Socket
 {
 	public:
+		// typedef
+			typedef int t_clientID;
+			typedef int t_fd;
+
 		// default parametaer
 			static const int DEFAULT_PORT = 8080;
 		// canonical & other constructors
 			Socket();
 			Socket( const Socket& other );
 			~Socket();
-			Socket& operator=( const Socket& other );
 
 			Socket( const int port );
 
@@ -54,18 +59,24 @@ class Socket
 			};
 
 	private:
-		typedef int clientfd;
+		static const int BUFFER_SIZE = 1 << 10;
 		const int port_;
 		int sockfd_;
 		std::string IPAddress_;
 
+        std::vector<struct pollfd> poll_fd_vec_;
+        std::set<t_fd> registered_fd_set_;
+		
+        std::map<t_fd, std::string> msg_to_send_map_;
+
 		void setup_();
-		void add_pollfd_(const int new_fd);
-		void close_fd_(const int _fd, const int _i_poll_fd);
-        void close_fd_(const int _fd);
-		void send_msg_(int fd, const std::string msg);
-		void register_new_client_(int sock_fd);
-		RecievedMsg recieve_msg_from_connected_client_(int _connection);
+		void add_pollfd_(const t_fd new_fd);
+		int get_pollfd_vec_index( const t_fd fd );
+		void close_fd_(const t_fd _fd, const int _i_poll_fd);
+        void close_fd_(const t_fd _fd);
+		void send_msg_(t_fd fd, const std::string msg);
+		void register_new_client_(t_fd sock_fd);
+		RecievedMsg recieve_msg_from_connected_client_(t_fd _connection);
         const std::string getIPAddress_() const;
 
 

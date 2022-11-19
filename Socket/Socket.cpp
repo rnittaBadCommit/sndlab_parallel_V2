@@ -13,19 +13,15 @@ Socket::Socket()
 Socket::Socket( const Socket& other )
 : port_(other.port_)
 {
-	*this = other;
+	sockfd_ = other.sockfd_;
+	IPAddress_ = other.IPAddress_;
+	poll_fd_vec_ = other.poll_fd_vec_;
+	registered_fd_set_ = other.registered_fd_set_;
+	msg_to_send_map_ = other.msg_to_send_map_;
 }
 
 Socket::~Socket()
 {
-
-}
-
-Socket& Socket::operator=( const Socket& other )
-{
-	if (this == &other)
-		return (*this);
-
 
 }
 
@@ -125,32 +121,45 @@ void Socket::add_pollfd_(const int new_fd)
 	_poll_fd.events = POLLIN;
 	_poll_fd.revents = 0;
 	poll_fd_vec_.push_back(_poll_fd);
-	fd_to_index_map_[new_fd] = poll_fd_vec_.size() - 1;
 }
 
-void Socket::close_fd_(const int _fd, const int _i_poll_fd)
+int Socket::get_pollfd_vec_index( const t_fd _fd )
+{
+	for (size_t i = 0; i < poll_fd_vec_.size(); ++i)
+	{
+		if (poll_fd_vec_[i].fd == _fd)
+			return (i);
+	}
+	return (ERROR);
+}
+
+void Socket::close_fd_(const t_fd _fd, const int _i_pollfd_vec)
 {
 	close(_fd);
-	poll_fd_vec_.erase(poll_fd_vec_.begin() + _i_poll_fd);
-	fd_to_index_map_.erase(_fd);
+	poll_fd_vec_.erase(poll_fd_vec_.begin() + _i_pollfd_vec);
 	registered_fd_set_.erase(_fd);
 }
 
-void Socket::close_fd_(const int _fd)
+void Socket::close_fd_(const t_fd _fd)
 {
+	int _i_pollfd_vec = get_pollfd_vec_index(_fd);
+	if (_i_pollfd_vec == ERROR)
+		return ;
 	close(_fd);
-	poll_fd_vec_.erase(poll_fd_vec_.begin() + fd_to_index_map_[_fd]);
-	fd_to_index_map_.erase(_fd);
+	poll_fd_vec_.erase(poll_fd_vec_.begin() + _i_pollfd_vec);
 	registered_fd_set_.erase(_fd);
 }
 
-void Socket::send_msg_(int fd, const std::string msg)
+void Socket::send_msg_(t_fd _fd, const std::string _msg)
 {
-	msg_to_send_map_[fd].append(msg);
-	poll_fd_vec_[fd_to_index_map_[fd]].events = POLLOUT;
+	int _i_pollfd_vec = get_pollfd_vec_index(_fd);
+	if (_i_pollfd_vec == ERROR)
+		return ;
+	msg_to_send_map_[_fd].append(_msg);
+	poll_fd_vec_[_i_pollfd_vec].events = POLLOUT;
 }
 
-void Socket::register_new_client_(int sock_fd)
+void Socket::register_new_client_(t_fd sock_fd)
 {
 	int connection = accept(sock_fd, NULL, NULL);
 	if (connection < 0)
@@ -162,10 +171,9 @@ void Socket::register_new_client_(int sock_fd)
 	poll_fd.revents = 0;
 	poll_fd_vec_.push_back(poll_fd);
 	registered_fd_set_.insert(connection);
-	fd_to_index_map_[connection] = poll_fd_vec_.size() - 1;
 }
 
-RecievedMsg Socket::recieve_msg_from_connected_client_(int _connection)
+RecievedMsg Socket::recieve_msg_from_connected_client_(t_fd _connection)
 {
 	char buf[BUFFER_SIZE + 1];
 
